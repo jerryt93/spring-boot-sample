@@ -31,23 +31,26 @@ pipeline {
         archiveArtifacts 'target/*.jar'
       }
     }
-        stage('wait for confirm') {
-        input {
-            message "Should we deploy?"
-            ok "Yes, we should."
-            submitter "admin"
-            parameters {
-                string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
-            }
+    stage('wait for confirm') {
+      input {
+        message 'Should we deploy?'
+        id 'Yes, we should.'
+        submitter 'admin'
+        parameters {
+          string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
         }
-        steps {
-            echo "Hello, ${PERSON}, nice to meet you."
-        }
-    }  
-
+      }
+      steps {
+        echo "Hello, ${PERSON}, nice to meet you."
+      }
+    }
     stage('deploy') {
       steps {
-        sh 'make deploy-default'
+        sh '''docker build -t localhost:5000/spring-boot-sample-prod ./
+docker push localhost:5000/spring-boot-sample-prod
+docker pull localhost:5000/spring-boot-sample-prod
+docker run -d -p 8800:8000 localhost:5000/spring-boot-sample-prod
+'''
       }
     }
   }
